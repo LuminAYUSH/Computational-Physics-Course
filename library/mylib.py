@@ -1,5 +1,3 @@
-from math import *
-
 #Random Number Generator
 class pRNG():
     '''My class to store seed value and different types of pRNG'''
