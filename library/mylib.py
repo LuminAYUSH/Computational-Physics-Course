@@ -276,47 +276,44 @@ def Gauss_Seidel(A,B,xi,e=6):
 #Functions for root finding
 
 #Function to find root using Bisection method
-def Bisection(fn,a,b,e=6):
+def Bisection_root(fn,interval,e=6):
+    a,b = interval
     if (fn(a) * fn(b) >= 0):
-        print("You have not assumed right a and b\n")
+        print("You have not assumed right interval as the sign of value of function at these points is not opposite\n")
         return None
     c = a
     n = 0
-    while (b-a) >= 10**-e:
+    while (b-a) >= 10**-e and abs(fn(c)) > 10**-e:
         n += 1
         c = (a+b)/2
-        if abs(fn(c)) <= 10**-e:
-            break
+        #if abs(fn(c)) <= 10**-e:
+            #break
         if (fn(c)*fn(a)<0):
             b = c
         else:
             a = c
-    #print(f"The root in the given interval is {c:{1}.{e}} and the value of function is {fn(c):{1}.{e}f}")
+        print(f"Iteration no: {n} \troot -> {c:{1}.{e}f}")
+    print(f"\nThe root in the given interval converges to {c:{1}.{e}f} and the value of function is {fn(c):{1}.{e}f}")
     print("No. of iterations = ",n)
-    return c
+    #return c
 
 #Function to show bracketing
-def Bracketing(fn,a,b,e=4):
-    if (fn(a) * fn(b) >= 0):
-        print("You have not assumed right a and b\n")
-        return None
-    c = a
-    n = 0
-    while (b-a) >= 10**-e:
-        n+=1
-        c = (a+b)/2
-        if abs(fn(c)) <= 10**-e:
-            break
-        if (fn(c)*fn(a)<0):
-            b = c
-            print(f"N: {n} \t\tBracketing: \t({a:{1}.{e}f},{c:{1}.{e}f})")
-        else:
-            a = c
-            print(f"N: {n} \t\tBracketing: \t({c:{1}.{e}f},{b:{1}.{e}f})")
-    print("Total no of iterations = ",n-1)
-    
+def Bracketing(fn,interval,k=1,max_iter = 12):
+    a,b = interval
+    n = 1
+    while not fn(a)*fn(b) < 0 and n <= max_iter:
+        if abs(fn(a)) < abs(fn(b)):
+            a -= k*(b-a)
+        elif abs(fn(a)) > abs(fn(b)):
+            b += k*(b-a)
+        print(f"N: {n} \t\tBracketing: \t({a}, {b})")
+        n += 1
+    print("\nTotal no of iterations = ",n-1)
+    return [a,b]
+
 #Function to find root using Regula-Falsi method
-def Regula_falsi(fn,a,b,e=6):
+def Regula_falsi(fn,interval,e=6):
+    a,b = interval
     if (fn(a) * fn(b) >= 0):
         print("You have not assumed right a and b\n")
         return None
@@ -326,19 +323,20 @@ def Regula_falsi(fn,a,b,e=6):
     while abs(c-c1) > 10**-e or abs(fn(c)) > 10**-e:
         n += 1
         c = (a * fn(b) - b * fn(a))/ (fn(b) - fn(a))
-        if abs(fn(c)) <= 10**-e:
-            break
+        #if abs(fn(c)) <= 10**-e:
+            #break
         if (fn(c)*fn(a)<0):
             b = c
         elif (fn(c)*fn(b)<0):
             a = c
         c1 = c
-    #print(f"The root in the given interval is {c:{1}.{e}f} and the value of function is {fn(c):{1}.{e}f}")
+        print(f"Iteration no: {n} \troot -> {c:{1}.{e}f}")
+    print(f"\nThe root in the given interval converges to {c:{1}.{e}f} and the value of function is {fn(c):{1}.{e}f}")
     print("Total no of iterations = ",n)
-    return c
+    #return c
 
 #Function to find root using Newton_raphson method
-def Newton_raphson(fn,d_fn,x = 0.5,e=6):
+def Newton_Raphson(fn,d_fn,x = 0.5,e=6):
     '''fn: the function of which we want to find the root,
        d_fn: the derivative of the function
        x: initial guess for the root'''
@@ -348,9 +346,10 @@ def Newton_raphson(fn,d_fn,x = 0.5,e=6):
         x -= h
         h = fn(x)/d_fn(x)
         n += 1
-    #print(f"The root is {x:{1}.{e}f} and the value of function is {fn(x):{1}.{e}f}")
-    print("Total no of iterations = ",n)
-    return x
+        print(f"Iteration no: {n} \troot -> {x:{1}.{e}f}")
+    print(f"The root converges to {x:{1}.{e}f} and the value of function is {fn(x):{1}.{e}f}")
+    print("\n Total no of iterations = ",n)
+    #return x
 
 
 #Laguerre's Method
@@ -380,7 +379,7 @@ def deflation(root,c_lst):
     return coeff
 
 # Laguerre method to find all the roots of a polinomial
-def Laguerre(coeff,r_lst=[],guess=0,e=4):
+def Laguerre(coeff,r_lst=[],guess=1,e=4):
     c_lst = coeff[:]
     b0 = guess
     n = len(c_lst)-1
@@ -421,6 +420,8 @@ def Lagrange(x,X_lst,Y_lst,N):
     return y
 
 #Least Square Fitting
+
+# for linear relation
 def Linear_regression(X_lst,Y_lst,sigma=[]):
     N = len(X_lst)
     if len(sigma) == 0: sigma = N*[1]
@@ -435,5 +436,18 @@ def Linear_regression(X_lst,Y_lst,sigma=[]):
     m = (Sxy*S - Sx*Sy)/delta
     var_c = Sxx/delta
     var_m = S/delta
-    pearson_r = Sxy/(Sxx*Syy)
+    pearson_r = (Sxy*Sxy)/(Sxx*Syy)
     return m,c,var_m,var_c,pearson_r
+
+#for polynomial of degree k
+def LeastSquare_polyfit(X,Y,k):
+    n = len(X)
+    A = [(k+1)*[0] for _ in range(k+1)]
+    B = (k+1)*[0]
+    for i in range(k+1):
+        B[i] = sum((X[l]**i)*Y[l] for l in range(n))
+        A[0][i] = sum(X[l]**i for l in range(n))
+    for j in range(1,k+1):
+        A[j] = A[j-1][1:] + [sum((X[l]**(k+j)) for l in range(n))]
+    solution = Gauss_Jordan_Solve(A,B)
+    return solution
