@@ -1,15 +1,15 @@
 #Random Number Generator
 class pRNG():
     '''My class to store seed value and different types of pRNG'''
-    seed = 10
+    seed = 101
     def LCG(low=0,high=1):
         '''Gives a random number between low and high'''
         a = 1103515245
         c = 12345
         m = 32768
-        x1 = ((a*(pRNG.seed)+c)%m)/m
+        x1 = ((a*(pRNG.seed)+c)%m)
         pRNG.seed = x1 #changing the seed value every time the rng is called
-        val = low + abs(high-low)*x1
+        val = low + abs(high-low)*x1/m
         return val
 
 ##Linear Algebra
@@ -273,7 +273,7 @@ def Gauss_Seidel(A,B,xi,e=6):
     print(f"No of Iterations: {count}\n")
     return xi
 
-#Functions for root finding
+##Functions for root finding
 
 #Function to find root using Bisection method
 def Bisection_root(fn,interval,e=6):
@@ -406,7 +406,7 @@ def Laguerre(coeff,r_lst=[],guess=1,e=4):
             b0 = b1
     return r_lst
 
-#Data Interpolation and Fitting
+##Data Interpolation and Fitting
 
 #Lagrange Interpolation
 def Lagrange(x,X_lst,Y_lst,N):
@@ -451,3 +451,52 @@ def LeastSquare_polyfit(X,Y,k):
         A[j] = A[j-1][1:] + [sum((X[l]**(k+j)) for l in range(n))]
     solution = Gauss_Jordan_Solve(A,B)
     return solution
+
+##Numerucal Integration
+
+#Function to find integration using Midpoint method
+def midpoint_int(fn,a,b,n):
+    h = abs(a-b)/n
+    add = 0
+    xi = a+h/2
+    for i in range(n):
+        add += h*fn(xi)
+        xi += h
+    return add
+
+#Function to find integration using Trapezoidal method
+def trap_int(fn,a,b,n):
+    h = abs(a-b)/n
+    add = 0
+    xi = a
+    for i in range(n+1):
+        if i == 0 or i == n:
+            add += (h/2)*fn(xi)
+        else:
+            add += h*fn(xi)
+        xi += h
+    return add
+
+#Function to find integration using Simpson method
+def Simpson_int(fn,x0,x2,n):
+    h = abs(x2-x0)/n
+    add = 0
+    xi = x0
+    for i in range(n+1):
+        if i == 0 or i == n:
+            add += (h/3)*fn(xi)
+        elif i%2 == 0:
+            add += (2*h/3)*fn(xi)
+        else:
+            add += (4*h/3)*fn(xi)
+        xi += h
+    return add
+
+#Function to find integration using Monte-Carlo method
+def Monte_Carlo(fn,a,b,N):
+    from mylib import pRNG
+    f_x = [fn(pRNG.LCG(a,b)) for _ in range(N)]
+    avg = sum(f_x)/N
+    s = (b-a)*avg
+    var = (1/N)*sum(i*i for i in f_x) - (avg)**2
+    return s, var
