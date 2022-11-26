@@ -346,16 +346,15 @@ def Newton_Raphson(fn,d_fn,x = 0.5,e=6):
         x -= h
         h = fn(x)/d_fn(x)
         n += 1
-        print(f"Iteration no: {n} \troot -> {x:{1}.{e}f}")
-    print(f"The root converges to {x:{1}.{e}f} and the value of function is {fn(x):{1}.{e}f}")
+        #print(f"Iteration no: {n} \troot -> {x:{1}.{e}f}")
+    #print(f"The root converges to {x:{1}.{e}f} and the value of function is {fn(x):{1}.{e}f}")
     print("\n Total no of iterations = ",n)
-    #return x
-
+    return x
 
 #Laguerre's Method
 
 # Function to find the value of a polynomial at a given 'x'
-# using its list of coefficients
+# using its list of coefficiewnts
 def Pn(x,c_lst):
     n = len(c_lst)-1
     add = 0
@@ -500,3 +499,213 @@ def Monte_Carlo(fn,a,b,N):
     s = (b-a)*avg
     var = (1/N)*sum(i*i for i in f_x) - (avg)**2
     return s, var
+
+#RK4
+import matplotlib.pyplot as plt
+
+def RK4(xt,f_xy,x0,y0,h=1e-3):
+    n = (xt-x0)//h
+    X_arr = [x0]
+    Y_arr = [y0]
+    for i in range(n):
+        k1 = h*f_xy(y0,x0)
+        k2 = h*f_xy(y0 + k1/2,x0 + h/2)
+        k3 = h*f_xy(y0 + k2/2,x0 + h/2)
+        k4 = h*f_xy(y0 + k3,x0 + h)
+        yt = y0 + (1/6)*(k1+2*k2+2*k3+k4)
+        y0 = yt
+        x0 += h
+        X_arr.append(x0)
+        Y_arr.append(y0)
+    plt.plot(X_arr,Y_arr,'g-',label = 'final plot')
+    plt.grid()
+    plt.legend()
+    plt.show()
+    return yt
+
+def RK4_Coupled_XY(d2ydx2, dydx, x0, y0, z0, xf, st):
+    x = [x0]
+    y = [y0]
+    z = [z0]      # dy/dx
+    n = int((xf-x0)/st)     # no. of steps
+    for i in range(n):
+        x.append(x[i] + st)
+        k1 = st * dydx(x[i], y[i], z[i])
+        l1 = st * d2ydx2(x[i], y[i], z[i])
+        k2 = st * dydx(x[i] + st/2, y[i] + k1/2, z[i] + l1/2)
+        l2 = st * d2ydx2(x[i] + st/2, y[i] + k1/2, z[i] + l1/2)
+        k3 = st * dydx(x[i] + st/2, y[i] + k2/2, z[i] + l2/2)
+        l3 = st * d2ydx2(x[i] + st/2, y[i] + k2/2, z[i] + l2/2)
+        k4 = st * dydx(x[i] + st, y[i] + k3, z[i] + l3)
+        l4 = st * d2ydx2(x[i] + st, y[i] + k3, z[i] + l3)
+
+        y.append(y[i] + (k1 + 2*k2 + 2*k3 + k4)/6)
+        z.append(z[i] + (l1 + 2*l2 + 2*l3 + l4)/6)
+        
+    plt.plot(x,y,'r-')
+    plt.plot(x,z,'g-')
+    plt.grid()
+    #plt.legend()
+    plt.show()
+    #print('Line here is not a fitting of the polynomial. Has been added to aid the eye to track the points.')
+
+    return x, y, z
+
+def RK4_Coupled_XYZ(dxdt, dydt, dzdt, x0, y0, z0, t0, tf, st):
+    x = [x0]
+    y = [y0]
+    z = [z0]
+    t = [t0] 
+
+    n = int((tf-t0)/st)     # no. of steps
+    for i in range(n):
+        t.append(t[i] + st)
+        k1x = st * dxdt(x[i], y[i], z[i],t[i])
+        k1y = st * dydt(x[i], y[i], z[i],t[i])
+        k1z = st * dzdt(x[i], y[i], z[i],t[i])
+        
+        k2x = st * dxdt(x[i] + k1x/2, y[i] + k1y/2, z[i] + k1z/2,t[i] + st/2)
+        k2y = st * dydt(x[i] + k1x/2, y[i] + k1y/2, z[i] + k1z/2,t[i] + st/2)
+        k2z = st * dzdt(x[i] + k1x/2, y[i] + k1y/2, z[i] + k1z/2,t[i] + st/2)
+        
+        k3x = st * dxdt(x[i] + k2x/2, y[i] + k2y/2, z[i] + k2z/2,t[i] + st/2)
+        k3y = st * dydt(x[i] + k2x/2, y[i] + k2y/2, z[i] + k2z/2,t[i] + st/2)
+        k3z = st * dzdt(x[i] + k2x/2, y[i] + k2y/2, z[i] + k2z/2,t[i] + st/2)
+        
+        k4x = st * dxdt(x[i] + k3x, y[i] + k3y, z[i] + k3z,t[i] + st)
+        k4y = st * dydt(x[i] + k3x, y[i] + k3y, z[i] + k3z,t[i] + st)
+        k4z = st * dzdt(x[i] + k3x, y[i] + k3y, z[i] + k3z,t[i] + st)
+        
+
+        x.append(x[i] + (k1x + 2*k2x + 2*k3x + k4x)/6)
+        y.append(y[i] + (k1y + 2*k2y + 2*k3y + k4y)/6)
+        z.append(z[i] + (k1z + 2*k2z + 2*k3z + k4z)/6)
+
+    sphere = plt.axes(projection='3d')
+    sphere.plot(x, y, z,'o-')
+    
+    return x, y, z, t
+
+def RK4_boundary_value(y0, z0,x0, N, end, interpol):
+    y_i = y0
+    z_i = z0
+    step = 0
+    yl = [y0]
+    zl = [z0]
+    xl = [x0]
+    h = (end-0)/N
+    while step <= end:
+        k1y = h*boundary_RK4_dyx(y_i, z_i, step)
+        k1z = h*boundary_RK4_dzx(y_i, z_i, step)
+
+        k2y = h*boundary_RK4_dyx(y_i + k1y/2, z_i+k1z/2, step+h/2)
+        k2z = h*boundary_RK4_dzx(y_i + k1y/2, z_i+k1z/2, step+h/2)
+
+        k3y = h*boundary_RK4_dyx(y_i+k2y/2, z_i+k2z/2, step+h/2)
+        k3z = h*boundary_RK4_dzx(y_i+k2y/2, z_i+k2z/2, step+h/2)
+
+        k4y = h*boundary_RK4_dyx(y_i+k3y, z_i+k3z, step+h)
+        k4z = h*boundary_RK4_dzx(y_i+k3y, z_i+k3z, step+h)
+
+        y_i += (k1y+2*k2y+2*k3y+k4y)/6
+        z_i += (k1z+2*k2z+2*k3z+k4z)/6
+        yl.append(y_i)
+        zl.append(z_i)
+        step += h
+        xl.append(step)
+
+    if interpol == 0:
+        return zl, yl, xl
+    else:
+        return z_i, y_i
+
+def boundary_RK4_dyx(y,z,x):
+    f = z
+    return f
+
+def boundary_RK4_dzx(y,z,x):
+    f = 0.01*(y-20)
+    return f
+
+import numpy as np
+import toolsar, math
+
+def PDE_Solve(lx,Nx,lt,Nt,lower_x,tot_steps):
+    step_arr = [10, 20, 50, 100, 200, 500, 1000, tot_steps]
+    hx=(lx/Nx)
+    ht=(lt/Nt)
+    alpha=ht/(hx)**2
+    V0=np.zeros(Nx+1)
+    V1=np.zeros(Nx+1)
+    x_cor = np.linspace(lower_x, lx, Nx + 1)
+    ctr=0 #marker for the value in step_arr
+    #if alpha<=0.5:print("Stability can be a problem")
+    for i in range(0,Nx+1):
+        if lower_x + (hx * i) == 1:#1 as inital 300C at length 1
+            V0[i]=300
+        else:
+            V0[i]=0
+        x_cor[i]=(lower_x + hx * i)
+    plt.plot(x_cor, V0, label=0)
+    #Matrix mult for sparse when only some are multiplied
+    for j in range(0,tot_steps+1):#1000 is number of steps taken
+        for i in range(0,Nx+1):
+
+            if i==0:
+                V1[i]=(1-2*alpha)*V0[i]+alpha*V0[i+1]
+            elif i==Nx:
+                V1[i]=(1-2*alpha)*V0[i]+alpha*V0[i-1]
+            else:
+                V1[i]=(1-2*alpha)*V0[i]+alpha*V0[i-1]+alpha*V0[i+1]
+        for k in range(0,Nx+1):#Equating array V0 to V1
+            V0[k]=V1[k]
+        if j==step_arr[ctr]:
+            plt.plot(x_cor,V1,label=step_arr[ctr])
+            #print(V0[50])
+            ctr=ctr+1
+    plt.legend()
+    return None
+
+def EigenPI(A, k_max, tol, guess):
+    na = len(A)
+    b_k=[]
+    lambda1=0
+    if str(guess)=='random':
+        for i in range(0,na):
+            R=[]
+            r=toolsar.rnum(i)
+            R.append(r)
+            b_k.append(R)
+    else:
+        b_k = guess
+    #print('\n Guess vector:',b_k)
+    
+    e_new=1
+    e_old=0
+    i=0
+    while (abs(e_new - e_old) >= tol) and (i in range(0,k_max)):
+        e_old=lambda1
+        b_k = toolsar.crossmat(A,b_k)
+        b_k_n = 0
+        for j in range(0,len(b_k)):
+            b_k_n += (b_k[j][0])**2
+        
+        for j in range(0,len(b_k)):
+            b_k[j][0] = b_k[j][0] / math.sqrt(b_k_n)
+        
+        i=i+1
+        
+        #finding the value of b_k*Ab_k
+        x1=toolsar.matrixtranspose(b_k)
+        x2=toolsar.crossmat(x1,A)
+        x3=toolsar.crossmat(x2,b_k)
+        #finding value of b_k*b_k
+        v=toolsar.matrixtranspose(b_k)
+        v1=toolsar.crossmat(v,b_k)
+        #lambda1 = b_k*Ab_k / b_k*b_k
+        lambda1=x3[0][0]/v1[0][0]
+        
+        e_new=lambda1
+    
+    print('\n Matrix A:',A,'\n \n Eignvector:',b_k,f'\n \n Eigenvalue:{lambda1:1.4f}','\n \n', i,'iterations.')
+    return b_k,lambda1
