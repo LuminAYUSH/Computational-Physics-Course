@@ -83,7 +83,7 @@ def Identity(n):
     return I_n
 
 ##Code to find the inverse of a matrix using Gauss-Jordan method
-def GJ_Inverse(a,r_factor = 5):
+def LU_Inverse(a,r_factor = 5):
     n = len(a)
     b = Identity(n)
     A = aug_mtrx(a,b)
@@ -348,8 +348,8 @@ def Newton_Raphson(fn,d_fn,x = 0.5,e=6):
         n += 1
         #print(f"Iteration no: {n} \troot -> {x:{1}.{e}f}")
     #print(f"The root converges to {x:{1}.{e}f} and the value of function is {fn(x):{1}.{e}f}")
-    print("\n Total no of iterations = ",n)
-    return x
+    print("\nTotal no of iterations = ",n)
+    return round(x,e)
 
 #Laguerre's Method
 
@@ -521,14 +521,14 @@ def RK4(xt,f_xy,x0,y0,h=1e-3):
     plt.grid()
     plt.legend()
     plt.show()
-    return yt
+    return X_arr, Y_arr
 
 def RK4_Coupled_XY(d2ydx2, dydx, x0, y0, z0, xf, st):
     x = [x0]
     y = [y0]
     z = [z0]      # dy/dx
     n = int((xf-x0)/st)     # no. of steps
-    for i in range(n):
+    for i in range(n-1):
         x.append(x[i] + st)
         k1 = st * dydx(x[i], y[i], z[i])
         l1 = st * d2ydx2(x[i], y[i], z[i])
@@ -542,10 +542,10 @@ def RK4_Coupled_XY(d2ydx2, dydx, x0, y0, z0, xf, st):
         y.append(y[i] + (k1 + 2*k2 + 2*k3 + k4)/6)
         z.append(z[i] + (l1 + 2*l2 + 2*l3 + l4)/6)
         
-    plt.plot(x,y,'r-')
-    plt.plot(x,z,'g-')
+    plt.plot(x,y,'r-', label = 'Y vs T')
+    plt.plot(x,z,'g-', label = 'V vs T')
     plt.grid()
-    #plt.legend()
+    plt.legend()
     plt.show()
     #print('Line here is not a fitting of the polynomial. Has been added to aid the eye to track the points.')
 
@@ -666,7 +666,8 @@ def PDE_Solve(lx,Nx,lt,Nt,lower_x,tot_steps):
     plt.legend()
     return None
 
-def EigenPI(A, k_max, tol, guess):
+def Eigen_solve(A, k_max, tol, guess,r):
+    #tol = 10^(-r)
     na = len(A)
     b_k=[]
     lambda1=0
@@ -707,5 +708,8 @@ def EigenPI(A, k_max, tol, guess):
         
         e_new=lambda1
     
-    print('\n Matrix A:',A,'\n \n Eignvector:',b_k,f'\n \n Eigenvalue:{lambda1:1.4f}','\n \n', i,'iterations.')
+    for l in range(len(A)):
+        A[l] = [round(ele,r) for ele in A[l]]
+        b_k[l][0] = round(b_k[l][0],r)
+    print('\n Matrix A:',A,'\n \n Eignvector:',b_k,f'\n \n Eigenvalue:{lambda1:1.{r}f}','\n \n', i,'iterations.')
     return b_k,lambda1
