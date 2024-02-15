@@ -112,10 +112,11 @@ def gauss_quadrature(fn, a, b, n):
 #--------------------------------------------------------#
 #-------------------------Rk4----------------------------#
 #--------------------------------------------------------#
-def rk4_step(x, y, h):
+def rk4_step(f, x, y, h):
     """Performs a single step of the fourth-order Runge-Kutta method.
 
     Args:
+        f (function): The derivative y' in terms of x and y.
         x (float): The current x value.
         y (float): The current y value.
         h (float): The step size.
@@ -129,10 +130,11 @@ def rk4_step(x, y, h):
     k4 = h * f(x + h, y + k3)
     return y + (k1 + 2*k2 + 2*k3 + k4) / 6
 
-def solve_ode_rk4(initial_x, initial_y, interval_size, num_steps):
-    """ Solves a first-order ordinary differential equation using the fourth-order Runge-Kutta method.
+def solve_ode_rk4(f, initial_x, initial_y, interval_size, num_steps):
+    """Solves a first-order ordinary differential equation using the fourth-order Runge-Kutta method.
     
     Parameters:
+    - f: The derivative y' in terms of x and y.
     - initial_x: The initial value of the independent variable.
     - initial_y: The initial value of the dependent variable.
     - interval_size: The size of the interval between each step.
@@ -145,7 +147,7 @@ def solve_ode_rk4(initial_x, initial_y, interval_size, num_steps):
     x = initial_x
     y = initial_y
     for _ in range(num_steps):
-        y = rk4_step(x, y, interval_size)
+        y = rk4_step(f, x, y, interval_size)
         x += interval_size
         solution.append((x, y))
     return solution
