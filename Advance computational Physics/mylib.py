@@ -348,8 +348,8 @@ def Newton_Raphson(fn,d_fn,x = 0.5,e=6):
         x -= h
         h = fn(x)/d_fn(x)
         n += 1
-        #print(f"Iteration no: {n} \troot -> {x:{1}.{e}f}")
-    #print(f"The root converges to {x:{1}.{e}f} and the value of function is {fn(x):{1}.{e}f}")
+        print(f"Iteration no: {n} \troot -> {x:{1}.{e}f}")
+    print(f"The root converges to {x:{1}.{e}f} and the value of function is {fn(x):{1}.{e}f}")
     print("\nTotal no of iterations = ",n)
     return round(x,e)
 
